@@ -1,0 +1,25 @@
+{
+  "name": "pocket-cube-vis",
+  "homepage": "https://github.com/amaurs/pocket-cube-vis",
+  "authors": [
+    "amaurs <amaury.gtz@gmail.com>"
+  ],
+  "description": "Visualization of Pocket Cube",
+  "main": "index.html",
+  "keywords": [
+    "pocket",
+    "cube"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "^4.7.0"
+  }
+}
