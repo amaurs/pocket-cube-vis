@@ -1,10 +1,12 @@
+'use strict';
 
+const util = require('./_util');
 // Define the dimensions of the visualization. We're using
 // a size that's convenient for displaying the graphic on
 // http://jsDataV.is
 
-var width = 640,
-    height = 480;
+var width = 640;
+var height = 480;
 
 // Define the data for the example. In general, a force layout
 // requires two data arrays. The first array, here named `nodes`,

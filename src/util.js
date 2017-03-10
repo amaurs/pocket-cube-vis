@@ -84,5 +84,23 @@ module.exports = {
         else{
             return this.factorial(n -1) * n;
         }
+    },
+    intToRGB: function(value){
+        var rgb = [];
+        if(0 <= value && value < Math.pow(2,24)){
+            rgb.push((value & 0xFF0000) >>> 16);
+            rgb.push((value & 0xFF00) >>> 8);
+            rgb.push(value & 0xFF);
+        }
+        else{
+            throw 'Invalid value when converting int to rgb.';
+        }
+        return rgb;
+    },
+    pocketCubeToInt: function(orientation, permutation){
+        return (orientation << 13) | permutation;
+    },
+    pocketCubeToRGB: function(orientation, permutation){
+        return this.intToRGB(this.pocketCubeToInt(orientation, permutation));
     }
 }
