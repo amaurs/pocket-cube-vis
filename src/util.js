@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     toTernary: function(decimal){
         return this.toBaseN(decimal, 3);
     },
@@ -102,5 +102,8 @@ module.exports = {
     },
     pocketCubeToRGB: function(orientation, permutation){
         return this.intToRGB(this.pocketCubeToInt(orientation, permutation));
+    },
+    rgbToPocketCube: function(red, green, blue){
+        return (red << 16) | (green << 8) | blue;
     }
-}
+};

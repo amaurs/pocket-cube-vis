@@ -3,3 +3,5 @@ bower_components/*
 deploy.sh
 exclude.txt
 example.html
+example2.html
+js/*
