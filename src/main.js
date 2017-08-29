@@ -5,8 +5,12 @@ import util from './util.js';
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 
-var height = 5040;
-var width = 729;
+var w = 3;
+var h = 19;
+var n = 255
+
+var height = h * n;
+var width = w * n;
 
 var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -17,17 +21,32 @@ var pointer = 0;
 
 function draw() {
 
-  for(var permutation = 0; permutation < util.factorial(7); permutation++){
-      for(var orientation = 0; orientation < Math.pow(3,6); orientation++){
-        var rgb = util.pocketCubeToRGB(orientation, permutation);
-        allColors[pointer + 0] = rgb[0];
-        allColors[pointer + 1] = rgb[1];
-        allColors[pointer + 2] = rgb[2];
-        allColors[pointer + 3] = 255;
-        pointer += 4;        
+
+  for(var k = 0; k < w; k++){
+    for(var l = 0; l < h; l++){
+      var red = l * w + k;
+      for(var i = 0; i < n; i++){
+        var green = i;
+        for(var j = 0; j < n; j++){
+          var blue = i;
+          if(RGBToInt(red, green, blue) < 7 * 3 * 3 * 3 * 3 * 3 * 3 * 3 * 3 * 2 * 2 * 2 * 5 * 2){
+            allColors[pointer + 0] = red;
+            allColors[pointer + 1] = green;
+            allColors[pointer + 2] = blue;
+            allColors[pointer + 3] = 255;
+
+          } else{
+            allColors[pointer + 0] = 255;
+            allColors[pointer + 1] = 255;
+            allColors[pointer + 2] = 255;
+            allColors[pointer + 3] = 255;
+          }
+          pointer += 4; 
+        }
+      }
     }
   }
-  console.log(allColors);
+
   ctx.putImageData(imageData, 0, 0);
 }
 

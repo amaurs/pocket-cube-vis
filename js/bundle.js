@@ -1,154 +1,225 @@
 'use strict';
 
-const util = require('./_util');
-// Define the dimensions of the visualization. We're using
-// a size that's convenient for displaying the graphic on
-// http://jsDataV.is
+var util = {
+    toTernary: function(decimal){
+        return this.toBaseN(decimal, 3);
+    },
+    fromTernary: function(ternary){
+        return this.fromBaseN(ternary, 3);
+    },
+    toBinary: function(decimal){
+        return this.toBaseN(decimal, 2);
+    },
+    fromBinary: function(binary){
+        return this.fromBaseN(binary, 2);
+    },
+    toBaseN: function(decimal, base){
+        var remainder = 0;
+        var quotient = decimal;
+        var i = 0;
+        var result = 0;
+        while(quotient > 0)
+        {
+            remainder = quotient % base;
+            quotient = Math.floor(quotient / base);
+            result = result + this.pow(10, i) * remainder;
+            i++;
+        }
+        return result;
+    },
+    fromBaseN: function(decimal, base){
+        var remainder = 0;
+        var quotient = decimal;
+        var i = 0;
+        var result = 0;
+        while(quotient > 0)
+        {
+            remainder = quotient % 10;
+            quotient = Math.floor(quotient / 10);
+            result = result + this.pow(base, i) * remainder;
+            i++;
+        }
+        return result;
+    },
+    toFactoradic: function(decimal){
+        var remainder = 0;
+        var quotient = decimal;
+        var i = 0;
+        var result = 0;
+        while(quotient > 0)
+        {
+            remainder = quotient % (i + 1);
+            quotient = Math.floor(quotient / (i + 1));
+            result = result + this.pow(10, i) * remainder;
+            i++;
+        }
+        return result;
+    },
+    fromFactoradic: function(factoradic){
+        var remainder = 0;
+        var quotient = factoradic;
+        var i = 0;
+        var result = 0;
+        while(quotient > 0)
+        {
+            remainder = quotient % 10;
+            quotient = Math.floor(quotient / 10);
+            result = result + this.factorial(i) * remainder;
+            i++;
+        }
+        return result;
+    },  
+    pow: function(a, b){
+        var result = 1;
+        for(var i = 0; i < b; i++){
+           result *= a;
+        }
+        return result;
+    },
+    factorial: function(n){
+        if(n == 0){
+            return 1;
+        }
+        else if(n == 1){
+            return 1;
+        }
+        else{
+            return this.factorial(n -1) * n;
+        }
+    },
+    intToRGB: function(value){
+        var rgb = [];
+        if(0 <= value && value < Math.pow(2,24)){
+            rgb.push((value & 0xFF0000) >>> 16);
+            rgb.push((value & 0xFF00) >>> 8);
+            rgb.push(value & 0xFF);
+        }
+        else{
+            throw 'Invalid value when converting int to rgb.';
+        }
+        return rgb;
+    },
+    RGBToInt: function(red, green, blue){
+        return (red << 16) + (green << 8) + blue;
+    },
+    pocketCubeToInt: function(orientation, permutation){
+        return orientation * 7 * 6 * 5 * 4 * 3 * 2 + permutation;
+    },
+    pocketCubeToRGB: function(orientation, permutation){
+        return this.intToRGB(this.pocketCubeToInt(orientation, permutation));
+    },
+    rgbToPocketCube: function(red, green, blue){
+        return (red << 16) | (green << 8) | blue;
+    },
+    intToPocketCube: function(index){
+        var orientation = index / (7 * 6 * 5 * 4 * 3 * 2);
+        var permutation = index % (7 * 6 * 5 * 4 * 3 * 2);
+        return {"orientation":orientation, "permutation": permutation};
+    }
+};
 
-var width = 640;
-var height = 480;
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
 
-// Define the data for the example. In general, a force layout
-// requires two data arrays. The first array, here named `nodes`,
-// contains the object that are the focal point of the visualization.
-// The second array, called `links` below, identifies all the links
-// between the nodes. (The more mathematical term is "edges.")
+var w = 3;
+var h = 19;
+var n = 256;
 
-// For the simplest possible example we only define two nodes. As
-// far as D3 is concerned, nodes are arbitrary objects. Normally the
-// objects wouldn't be initialized with `x` and `y` properties like
-// we're doing below. When those properties are present, they tell
-// D3 where to place the nodes before the force layout starts its
-// magic. More typically, they're left out of the nodes and D3 picks
-// random locations for each node. We're defining them here so we can
-// get a consistent application of the layout which lets us see the
-// effects of different properties.
+var height = h * n;
+var width = w * n;
 
-var nodes = [
-    { x:   width/3, y: height/2 },
-    { x: 2*width/3, y: height/2 }
-];
+var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-// The `links` array contains objects with a `source` and a `target`
-// property. The values of those properties are the indices in
-// the `nodes` array of the two endpoints of the link.
+var allColors = imageData.data;
 
-var links = [
-    { source: 0, target: 1 }
-];
+var pointer = 0;
 
-// Here's were the code begins. We start off by creating an SVG
-// container to hold the visualization. We only need to specify
-// the dimensions for this container.
 
-var svg = d3.select('body').append('svg')
-    .attr('width', width)
-    .attr('height', height);
+function draw() {
 
-// Now we create a force layout object and define its properties.
-// Those include the dimensions of the visualization and the arrays
-// of nodes and links.
 
-var force = d3.layout.force()
-    .size([width, height])
-    .nodes(nodes)
-    .links(links);
+  for(var k = 0; k < w; k++){
+    for(var l = 0; l < h; l++){
+      var b = l * w + k;
+      console.log(b);
+      for(var i = 0; i < n; i++){
+        //var green = n - (i + 1);
+        var r = i;
+        for(var j = 0; j < n; j++){
+          //var blue = n - (j + 1);
+          var g = j;
+          if(util.RGBToInt(b, r, g) < 7 * 3 * 3 * 3 * 3 * 3 * 3 * 3 * 3 * 2 * 2 * 2 * 5 * 2 + 1 ){
 
-// There's one more property of the layout we need to define,
-// its `linkDistance`. That's generally a configurable value and,
-// for a first example, we'd normally leave it at its default.
-// Unfortunately, the default value results in a visualization
-// that's not especially clear. This parameter defines the
-// distance (normally in pixels) that we'd like to have between
-// nodes that are connected. (It is, thus, the length we'd
-// like our links to have.)
+            var pointer = xyToIndex(n * l + j, n * k + i, width) * 4;
+            //var pointer = l * w + k + (i * n + j);
+            allColors[pointer + 0] = r;
+            allColors[pointer + 1] = g;
+            allColors[pointer + 2] = 255 - b;
+          } else{
+            //console.log(util.RGBToInt(red, green, blue));
+            allColors[pointer + 0] = 0;
+            allColors[pointer + 1] = 0;
+            allColors[pointer + 2] = 0;
+          }
+          allColors[pointer + 3] = 255;
+          //pointer += 4; 
+        }
+      }
+    }
+  }
+  console.log("Total: " + (pointer/ 4));
+  ctx.putImageData(imageData, 0, 0);
+}
 
-force.linkDistance(width/2);
+function xyToIndex(x ,y, wi) {
+    return x * wi + y;
+}
 
-// Next we'll add the nodes and links to the visualization.
-// Note that we're just sticking them into the SVG container
-// at this point. We start with the links. The order here is
-// important because we want the nodes to appear "on top of"
-// the links. SVG doesn't really have a convenient equivalent
-// to HTML's `z-index`; instead it relies on the order of the
-// elements in the markup. By adding the nodes _after_ the
-// links we ensure that nodes appear on top of links.
+var color = document.getElementById('color');
+var body = document.getElementById('body');
+var orientation = document.getElementById('orientation');
+var permutation = document.getElementById('permutation');
+var pocket = document.getElementById('pocket');
+var redP = document.getElementById('red');
+var blueP = document.getElementById('blue');
+var greenP = document.getElementById('green');
 
-// Links are pretty simple. They're just SVG lines, and
-// we're not even going to specify their coordinates. (We'll
-// let the force layout take care of that.) Without any
-// coordinates, the lines won't even be visible, but the
-// markup will be sitting inside the SVG container ready
-// and waiting for the force layout.
+function pick(event) {
+    var x = event.layerX;
+    var y = event.layerY;
+    var pixel = ctx.getImageData(x, y, 1, 1);
+    var data = pixel.data;
+    var rgba = 'rgba(' + data[0] + ', ' + data[1] +
+               ', ' + data[2] + ', ' + (data[3] / 255) + ')';
+    body.style.backgroundColor =  rgba;
+    position.textContent = "position: ("+x+","+y+")";
+    
+    
+    var red = data[0];
+    var green = data[1];
+    var blue = data[2];
+    color.textContent = "color: " + rgbToHex(red, green, blue);
+    redP.textContent = "red: " + red;
+    greenP.textContent = "green: " + green;
+    blueP.textContent = "blue: " + blue;
 
-var link = svg.selectAll('.link')
-    .data(links)
-    .enter().append('line')
-    .attr('class', 'link');
+    var cubie = util.intToPocketCube(util.RGBToInt(255 - blue, red, green));
+    orientation.textContent = "orientation: " + Math.floor(cubie["orientation"]);
+    permutation.textContent = "permutation: " + cubie["permutation"];
 
-// Now it's the nodes turn. Each node is drawn as a circle.
 
-var node = svg.selectAll('.node')
-    .data(nodes)
-    .enter().append('circle')
-    .attr('class', 'node');
+}
 
-// We're about to tell the force layout to start its
-// calculations. We do, however, want to know when those
-// calculations are complete, so before we kick things off
-// we'll define a function that we want the layout to call
-// once the calculations are done.
 
-force.on('end', function() {
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
 
-    // When this function executes, the force layout
-    // calculations have concluded. The layout will
-    // have set various properties in our nodes and
-    // links objects that we can use to position them
-    // within the SVG container.
+function rgbToHex(r, g, b) {
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
 
-    // First let's reposition the nodes. As the force
-    // layout runs it updates the `x` and `y` properties
-    // that define where the node should be centered.
-    // To move the node, we set the appropriate SVG
-    // attributes to their new values. We also have to
-    // give the node a non-zero radius so that it's visible
-    // in the container.
+canvas.addEventListener('mousemove', pick);
 
-    node.attr('r', width/25)
-        .attr('cx', function(d) { return d.x; })
-        .attr('cy', function(d) { return d.y; });
-
-    // We also need to update positions of the links.
-    // For those elements, the force layout sets the
-    // `source` and `target` properties, specifying
-    // `x` and `y` values in each case.
-
-    link.attr('x1', function(d) { return d.source.x; })
-        .attr('y1', function(d) { return d.source.y; })
-        .attr('x2', function(d) { return d.target.x; })
-        .attr('y2', function(d) { return d.target.y; });
-
-});
-
-// Okay, everything is set up now so it's time to turn
-// things over to the force layout. Here we go.
-
-force.start();
-
-// By the time you've read this far in the code, the force
-// layout has undoubtedly finished its work. Unless something
-// went horribly wrong, you should see two light grey circles
-// connected by a single dark grey line. If you have a screen
-// ruler (such as [xScope](http://xscopeapp.com) handy, measure
-// the distance between the centers of the two circles. It
-// should be somewhere close to the `linkDistance` parameter we
-// set way up in the beginning (480 pixels). That, in the most
-// basic of all nutshells, is what a force layout does. We
-// tell it how far apart we want connected nodes to be, and
-// the layout keeps moving the nodes around until they get
-// reasonably close to that value.
-
-// Of course, there's quite a bit more than that going on
-// under the hood. We'll take a closer look starting with
-// the next example.
+draw();

@@ -99,6 +99,9 @@ module.exports = {
         }
         return rgb;
     },
+    RGBToInt: function(red, green, blue){
+        return (red << 16) + (green << 8) + blue;
+    }
     pocketCubeToInt: function(orientation, permutation){
         return (orientation << 13) | permutation;
     },

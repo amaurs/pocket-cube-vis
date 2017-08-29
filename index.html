@@ -3,10 +3,43 @@
 <head>
 <title>Pocket Cube</title>
 
+<style>
+
+#info {
+    width: 256px;
+    height: 256px;
+    background-color: rgb(255,255,255);
+    float: left;
+    position:fixed;
+}
+#canvas {
+    margin-left: 256px
+}
+#red {
+    color: rgb(255, 0, 0);
+}
+#green {
+    color: rgb(0, 255, 0);
+}
+#blue {
+    color: rgb(0, 0, 255);
+}
+
+</style>
 
 <head>
-<body>
-  <script src="bower_components/d3/d3.js"></script>
-  <script src="js/bundle.js"></script>
+<body id="body">
+    <div id="info">
+        <p id="position"></p>
+        <p id="color"></p>
+        <p id="red"></p>
+        <p id="green"></p>
+        <p id="blue"></p>
+        <p id="orientation"></p>
+        <p id="permutation"></p>
+    </div>
+    <canvas id="canvas" height="4845" width="768"></canvas>
+    <script src="bower_components/d3/d3.js"></script>
+    <script src="js/bundle.js"></script>
 </body>
 </html>
