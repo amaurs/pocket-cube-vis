@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body{
+    width:960px;
+    margin:10px auto;
+}
+circle{
+  fill:white;
+  stroke:steelblue;  
+  stroke-width:2px;
+}
+line{
+  stroke:grey;
+  stroke-width:3px;
+}
+.incRect{
+    stroke:grey;
+    shape-rendering:crispEdges;
+}
+#incMatx text{
+    text-anchor:middle;
+    cursor:default;
+}
+#treesvg g text:hover, #treesvg g circle:hover{
+    cursor:pointer;
+}
+#navdiv{
+    background:#555;
+}
+#treesvg{
+    border:1px solid grey;
+}
+#labelpos{
+    color:white;
+}
+#navdiv button, #navdiv textarea{
+    vertical-align:middle;
+}
+#g_labels text{
+    text-anchor:middle;
+}
+#g_elabels text{
+    text-anchor:middle;
+    fill:red;
+    font-weight:bold;
+}
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script>
+function tree(){
+    var svgW=500, svgH =500, radius=50;
+    var tree={cx:200, cy:50, w:200, h:200};
+    
+    tree.vis={nodeId:0, label:'?', position:{x:tree.cx, y:tree.cy},children:[]};   
+    tree.size=1;
+    
+    tree.getVertices =  function(){
+        var nodesOrdered =[];
+        function getVertices(_tree,parent){  
+            nodesOrdered.push({nodeId:_tree.nodeId, 
+                               label:_tree.label, 
+                               position:_tree.position, 
+                               parent:parent}); 
+            _tree.children.forEach(function(d){ 
+                return getVertices(d, {nodeId:_tree.nodeId, 
+                                       position:_tree.position}); });
+        }
+
+        getVertices(tree.vis,{});
+        return nodesOrdered.sort(function(a,b){ return a.nodeId - b.nodeId;});
+    }
+    
+    tree.getEdges =  function(){
+        var linksOrdered =[];
+        function getEdges(_tree){
+            _tree.children.forEach(function(d){ 
+                linksOrdered.push({sourceNode:_tree.nodeId, 
+                                   sourceLabel:_tree.label, 
+                                   sourcePosition:_tree.position, 
+                                   targetNode:d.nodeId, 
+                                   targetLabel:d.label, 
+                                   targetPosition:d.position});});
+            _tree.children.forEach(getEdges);
+        }
+        getEdges(tree.vis);
+        return linksOrdered.sort(function(a,b){ return a.targetNode - b.targetNode;}); 
+    }
+    tree.hasChildren = function(parent){
+        var has = false;
+        function hasChildren(_tree){
+            if(_tree.nodeId == parent && _tree.children.length > 0){
+                has = true;
+                return;
+            }
+            _tree.children.forEach(hasChildren);
+        }
+        hasChildren(tree.vis);
+        return has;
+    }
+    tree.removeChilden = function(parent){
+        function removeChilden(_tree){
+            if(_tree.nodeId == parent){ 
+                _tree.children = []; 
+                return; 
+            }
+            _tree.children.forEach(removeChilden);
+        }
+        removeChilden(tree.vis);
+        console.log(tree.vis);
+        //reposition(tree.vis);
+        redraw();   
+    }
+    
+    tree.addLeaf = function(parent){
+        function addLeaf(_tree){
+            if(_tree.nodeId == parent){
+                _tree.children.push({nodeId:tree.size++, 
+                                 labelnav:'?', 
+                                 position:{},
+                                 children:[]});
+                
+                return; 
+            }
+            _tree.children.forEach(addLeaf);
+        }
+
+        addLeaf(tree.vis);
+        reposition(tree.vis);
+        redraw();
+    }
+
+    redraw = function(){
+        var edges = d3.select("#g_lines").selectAll('line').data(tree.getEdges());
+        
+        edges.transition().duration(500)
+            .attr('x1',function(d){ return d.sourcePosition.x;})
+            .attr('y1',function(d){ return d.sourcePosition.y;})
+            .attr('x2',function(d){ return d.targetPosition.x;})
+            .attr('y2',function(d){ return d.targetPosition.y;})
+    
+        edges.enter().append('line')
+            .attr('x1',function(d){ return d.sourcePosition.x;})
+            .attr('y1',function(d){ return d.sourcePosition.y;})
+            .attr('x2',function(d){ return d.sourcePosition.x;})
+            .attr('y2',function(d){ return d.sourcePosition.y;})
+            .transition().duration(500)
+            .attr('x2',function(d){ return d.targetPosition.x;})
+            .attr('y2',function(d){ return d.targetPosition.y;});
+            
+        var circles = d3.select("#g_circles").selectAll('circle').data(tree.getVertices());
+
+        circles.transition().duration(500)
+            .attr('cx',function(d){ return d.position.x;})
+            .attr('cy',function(d){ return d.position.y;});
+        
+        circles.enter().append('circle')
+            .attr('cx',function(d){ return d.parent.position.x;})
+            .attr('cy',function(d){ return d.parent.position.y;})
+            .attr('r',radius)
+            .on('click',addAllNodes)
+            .transition().duration(500)
+            .attr('cx',function(d){ return d.position.x;})
+            .attr('cy',function(d){ return d.position.y;});
+
+    }
+    
+    getLeafCount = function(_tree){
+        if(_tree.children.length == 0){
+            return 1;
+        } 
+        else{
+            return _tree.children.map(getLeafCount).reduce(function(a, b){ return a + b;});
+        }
+    }
+    
+    reposition = function(node){
+        var lC = getLeafCount(node); 
+        var left = node.position.x - tree.w * (lC-1) / 2;
+        node.children.forEach(function(d){
+            var w = tree.w * getLeafCount(d); 
+            left+=w; 
+            d.position = {x:left-(w+tree.w)/2, y:node.position.y + tree.h};
+            reposition(d);
+        });     
+    }   
+    
+    initialize = function(){
+        d3.select("body").append("div").attr('id','navdiv');
+      
+        d3.select("body").append("svg").attr("width", svgW).attr("height", svgH).attr('id','treesvg');
+
+        d3.select("#treesvg")
+            .append('g')
+            .attr('id','g_lines')
+            .selectAll('line')
+            .data(tree.getEdges()).enter()
+                .append('line')
+                .attr('x1',function(d){return d.sourcePosition.x;})
+                .attr('y1',function(d){return d.sourcePosition.y;})
+                .attr('x2',function(d){return d.targetPosition.x;})
+                .attr('y2',function(d){return d.targetPosition.y;});
+
+        d3.select("#treesvg")
+            .append('g')
+            .attr('id','g_circles')
+            .selectAll('circle')
+            .data(tree.getVertices()).enter()
+                .append('circle')
+                .attr('cx',function(d){return d.position.x;})
+                .attr('cy',function(d){return d.position.y;})
+                .attr('r',radius)
+                .on('click',addAllNodes);
+
+        tree.addLeaf(0);
+        //tree.addLeaf(0);
+    }
+    addAllNodes = function(d){
+        
+        //console.log(tree.hasChildren(d.nodeId));
+        
+        
+        
+        
+        
+
+        tree.addLeaf(d.nodeId);
+        //tree.addLeaf(d.nodeId);
+        //tree.addLeaf(d.nodeId);
+        //tree.addLeaf(d.nodeId);
+        //tree.addLeaf(d.nodeId);
+    }
+    initialize();
+
+    return tree;
+}
+var tree= tree();
+</script>

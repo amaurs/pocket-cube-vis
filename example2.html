@@ -1,0 +1,37 @@
+
+<!-- Learn about this code on MDN: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Pixel_manipulation_with_canvas -->
+
+<canvas id="canvas" width="4096" height="4096"></canvas>
+<div>
+  <input id="grayscalebtn" value="Grayscale" type="button">
+  <input id="invertbtn" value="Invert" type="button">
+  <script>
+
+    draw();
+    
+    function draw(img) {
+      var canvas = document.getElementById('canvas');
+      var ctx = canvas.getContext('2d');
+
+      var height = Math.pow(2, 12);
+      var width = Math.pow(2, 12);
+
+      var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      var allColors = imageData.data;
+      var pointer = 0;
+      for(var i = 0; i < Math.pow(2, 8); i++){
+        for(var j = 0; j < Math.pow(2, 8); j++){
+            for(var k = 0; k < Math.pow(2, 8); k++){
+                allColors[pointer + 0] = i;
+                allColors[pointer + 1] = k;
+                allColors[pointer + 2] = j;
+                allColors[pointer + 3] = 255;
+                pointer = pointer + 4;
+            }
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+    }
+  </script>
+</div>

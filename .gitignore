@@ -2,6 +2,3 @@ bower_components/*
 .DS_Store
 deploy.sh
 exclude.txt
-example.html
-example2.html
-js/*

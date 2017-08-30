@@ -7,7 +7,7 @@
 
 #info {
     width: 256px;
-    height: 256px;
+    height: 512px;
     background-color: rgb(255,255,255);
     float: left;
     position:fixed;
@@ -25,6 +25,40 @@
     color: rgb(0, 0, 255);
 }
 
+.hex {
+  cursor: pointer;
+  fill-opacity: .8;
+  stroke: #000;
+  stroke-width: 4;
+}
+
+#cube {
+  width: 255px;
+  height: 255px;
+}
+
+
+.red {
+  fill: #ff0000;
+}
+.blue {
+  fill: #0000ff;
+}
+.yellow {
+  fill: #ffff00;
+}
+
+.green {
+  fill: #00813d;
+}
+.white {
+  fill: #ffffff;
+}
+
+.orange {
+  fill: #ff8000;
+}
+
 </style>
 
 <head>
@@ -37,6 +71,37 @@
         <p id="blue"></p>
         <p id="orientation"></p>
         <p id="permutation"></p>
+        <svg id="cube" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 600 600" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <polygon class="hex red" points=" 150,225 215,187.5 280,225 215,262.5"></polygon>
+          <polygon class="hex red" points=" 215,187.5 280,150 345,187.5 280,225"></polygon>
+          <polygon class="hex red" points=" 280,225 345,187.5 410,225 345,262.5"></polygon>
+          <polygon class="hex red" points=" 215,262.5 280,225 345,262.5 280,300"></polygon>
+        
+          <polygon class="hex blue" points=" 150,225 215,262.5 215,337.5 150,300"></polygon>
+          <polygon class="hex blue" points=" 150,300 215,337.5 215,412.5 150,375"></polygon>
+          <polygon class="hex blue" points=" 215,337.5 280,375 280,450 215,412.5"></polygon>
+          <polygon class="hex blue" points=" 215,262.5 280,300 280,375 215,337.5"></polygon>
+          
+          <polygon class="hex yellow" points=" 20,300 85,262.5 85,337.5 20,375"></polygon>
+          <polygon class="hex yellow" points=" 20,375 85,337.55 85,412.5 20,450"></polygon>
+          <polygon class="hex yellow" points=" 85,262.5 150,225 150,300 85,337.5"></polygon>
+          <polygon class="hex yellow" points=" 85,337.5 150,300 150,375 85,412.5"></polygon>
+        
+          <polygon class="hex green" points=" 280,75 345,112.5 345,187.5 280,150"></polygon>
+          <polygon class="hex green" points=" 280,0 345,37.5 345,112.5 280,75"></polygon>
+          <polygon class="hex green" points=" 345,112.5 410,150 410,225 345,187.5"></polygon>
+          <polygon class="hex green" points=" 345,37.5 410,75 410,150 345,112.5"></polygon>
+        
+          <polygon class="hex orange" points=" 345,412.5 410,375 475,412.5 410,450"></polygon>
+          <polygon class="hex orange" points=" 410,450 475,412.5 540,450 475,487.5"></polygon>
+          <polygon class="hex orange" points=" 280,450 345,412.5 410,450 345,487.5"></polygon>
+          <polygon class="hex orange" points=" 345,487.5 410,450 475,487.5 410,525  "></polygon>
+        
+          <polygon class="hex white" points=" 280,300 345,262.5 345,337.5 280,375"></polygon>
+          <polygon class="hex white" points=" 345,262.5 410,225 410,300 345,337.5"></polygon>
+          <polygon class="hex white" points=" 345,337.5 410,300 410,375 345,412.5"></polygon>
+          <polygon class="hex white" points=" 280,375 345,337.5 345,412.5 280,450"></polygon>
+        </svg>
     </div>
     <canvas id="canvas" height="4845" width="768"></canvas>
     <script src="bower_components/d3/d3.js"></script>
