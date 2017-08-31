@@ -115,6 +115,29 @@ var util = {
         var orientation = index / (7 * 6 * 5 * 4 * 3 * 2);
         var permutation = index % (7 * 6 * 5 * 4 * 3 * 2);
         return {"orientation":orientation, "permutation": permutation};
+    },
+    toNum: function(value){
+        var aux = parseInt(value);
+        return aux ? aux : 0;
+    },
+    getNthTernary: function(index){
+        return util.toTernary(index).toString().padStart(8, "0").split("").map(util.toNum);
+    },
+    getNthPermutation: function(index, set){
+        var factoradic = util.toFactoradic(index);
+        var arr = new Array(set.length).fill(0);
+        var result = new Array(set.length);
+        var numbers = set.splice(0);
+        for(var i = numbers.length - 1; factoradic > 0; factoradic = Math.floor(factoradic / 10))
+        {
+            arr[i] = factoradic % 10;
+            i--;
+        }
+        for(var i = 0; i < arr.length; i++)
+        {
+            result[i] = numbers.splice(arr[i],1)[0];
+        }
+        return result;
     }
 };
 
@@ -204,10 +227,32 @@ function pick(event) {
     blueP.textContent = "blue: " + blue;
 
     var cubie = util.intToPocketCube(util.RGBToInt(255 - blue, red, green));
-    orientation.textContent = "orientation: " + Math.floor(cubie["orientation"]);
-    permutation.textContent = "permutation: " + cubie["permutation"];
+    
+    var orientationPocket = Math.floor(cubie["orientation"]);
+    var permutationPocket = cubie["permutation"]
+
+    orientation.textContent = "orientation: " + orientationPocket;
+    permutation.textContent = "permutation: " + permutationPocket;
+
+    paintPocket(orientationPocket, permutationPocket);
 
 
+}
+
+function paintCubie(faces, colors, rotation) {
+    console.log(faces);
+    console.log(colors);
+    document.getElementById('face-' + faces[(rotation + 0) % 3]).classList.add(colors[0]);
+    document.getElementById('face-' + faces[(rotation + 1) % 3]).classList.add(colors[1]);
+    document.getElementById('face-' + faces[(rotation + 2) % 3]).classList.add(colors[2]);
+}
+
+function clearPocket(){
+    for(var i = 0; i < cubies.length;i++) {
+        document.getElementById('face-' + cubies[i][0]).classList.remove("red", "white", "blue","yellow", "green", "orange");
+        document.getElementById('face-' + cubies[i][1]).classList.remove("red", "white", "blue","yellow", "green", "orange");
+        document.getElementById('face-' + cubies[i][2]).classList.remove("red", "white", "blue","yellow", "green", "orange");
+    }
 }
 
 
@@ -223,3 +268,27 @@ function rgbToHex(r, g, b) {
 canvas.addEventListener('mousemove', pick);
 
 draw();
+
+var cubies = [[1,2,3], [5,14,6], [7,20,15], [17,10,22],[18,12,11],[24,13,4], [9,8,16], [23,19,21]];
+var colors = [["red", "white", "blue"],["red", "green", "white"],["white", "green", "orange"],["yellow", "blue", "orange"],["yellow", "red", "blue"],["yellow", "green", "red"],["blue", "white", "orange"],["yellow", "green", "orange"]];
+
+function paintPocket(orientation, permutation){
+    
+    var orientationArray = util.getNthTernary(orientation);
+    var permutationArray = util.getNthPermutation(permutation, [0,1,2,3,4,5,6,7]);
+
+    console.log(orientationArray);
+    console.log(permutationArray);
+
+    clearPocket();
+
+    for(var i = 0; i < 8; i++) {
+        paintCubie(cubies[permutationArray[i]],colors[i],orientationArray[i]);
+    }
+}
+
+
+
+
+
+
